@@ -1,0 +1,30 @@
+table.sortable { 
+    width: 92vw;
+}
+
+.item {
+    height: 5em;
+    border-bottom: 1px solid;
+}
+
+.item img {
+    pointer-events: none;
+}
+
+.sortable > tbody > .item[draggable="true"] {
+    cursor: move;
+}
+
+.dragging {
+    opacity: 20%;
+}
+
+.custom-action-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.multiselect-container {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
