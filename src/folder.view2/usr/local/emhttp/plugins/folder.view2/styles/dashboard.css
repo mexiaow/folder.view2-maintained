@@ -2,22 +2,27 @@
     display:none;
 }
 
-.dashboard #docker_view > tr:last-child > td > .folder-showcase-outer,
-.dashboard #docker_view > tr.updated > td > .folder-showcase-outer {
+/*
+  Unraid 7.2+ 的 Dashboard 会对 Docker 列表容器（`#docker_view`）使用 `display: grid`。
+  FolderView2 在“文件夹展开”时，会把容器卡片节点移动到 `.folder-showcase` 内部（嵌套一层）。
+  这样容器卡片不再是 Dashboard 容器的“直接 grid item”，导致在文件夹内部退化成竖向列表。
+
+  这里的修复思路：
+  - 仅在文件夹展开时，让文件夹占满整行（跨列），避免高度不均衡
+  - 同时把 `.folder-showcase` 变成一个嵌套 grid，让文件夹内恢复横向网格自动换行
+*/
+.dashboard #docker_view .folder-showcase-outer[expanded="true"] {
     grid-column: 1 / -1;
 }
 
-.dashboard #docker_view .folder-showcase-outer > span.outer {
-    display: block;
-}
-
-.dashboard #docker_view .folder-showcase {
+.dashboard #docker_view .folder-showcase-outer[expanded="true"] .folder-showcase {
+    margin-top: 10px;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
     gap: 10px;
     align-items: start;
 }
 
-.dashboard #docker_view .folder-showcase > * {
+.dashboard #docker_view .folder-showcase-outer[expanded="true"] .folder-showcase > * {
     min-width: 0;
 }
