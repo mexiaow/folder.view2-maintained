@@ -6,12 +6,16 @@
 <!ENTITY launch "Settings/FolderView2">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2026.01.12">
-<!ENTITY md5 "2c252a67d68879e2f1f65d1e382e7c7a">
+<!ENTITY version "2026.01.12.1">
+<!ENTITY md5 "f2415937d48100f114c753d8ccfd1207">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/189167-plugin-folderview2" min="7.0.0">
     <CHANGES>
+
+###2026.01.12.1
+- 修复：Docker 标签页仅靠正则（regex-only）的文件夹不收纳容器
+- 修复：Folder 页面主题样式缺失时跳过加载，避免 style-*.css 404
 
 ###2026.01.12
 - 修复：Unraid 7.2+ 仪表盘 Docker 文件夹布局（保持卡片连续衔接排布）
