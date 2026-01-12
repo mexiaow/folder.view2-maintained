@@ -15,7 +15,17 @@ Markdown="false"
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.ui.css')?>">
 <link type="text/css" rel="stylesheet" href="<?autov('/plugins/folder.view2/styles/folder.css')?>">
-<link type="text/css" rel="stylesheet" href="<?autov("/plugins/dynamix.docker.manager/styles/style-{$display['theme']}.css")?>">
+<?php
+    // Unraid versions/themes may not ship theme-specific Docker manager styles (e.g. style-black.css).
+    // Avoid emitting a link that will 404 and pollute logs; gracefully skip if missing.
+    $theme = $display['theme'] ?? '';
+    $themeCssRel = "/plugins/dynamix.docker.manager/styles/style-{$theme}.css";
+    $themeCssFs = ($_SERVER['DOCUMENT_ROOT'] ?? '') . $themeCssRel;
+    if ($theme && @is_file($themeCssFs)) {
+        $themeCssHref = autov($themeCssRel);
+        echo "<link type=\"text/css\" rel=\"stylesheet\" href=\"{$themeCssHref}\">";
+    }
+?>
 <link type="text/css" rel="stylesheet" href="<?autov("/plugins/folder.view2/styles/include/jquery.multiselect.css")?>">
 <script src="<?autov('/plugins/folder.view2/scripts/include/jquery.multiselect.js')?>"></script>
 

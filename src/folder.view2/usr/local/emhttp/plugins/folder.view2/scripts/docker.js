@@ -203,6 +203,79 @@ const createFolder = (folder, id, positionInMainOrder, liveOrderArray, container
     // --- Store a snapshot of the live order array AT THE START of this folder's processing ---
     // This snapshot is crucial for correctly calculating `remBefore` based on original positions.
     const orderSnapshotAtFolderStart = [...liveOrderArray];
+
+    const getContainerLabel = (containerInfo, labelKey) => {
+        if (!containerInfo) {
+            return undefined;
+        }
+        return (
+            containerInfo.Labels?.[labelKey] ??
+            containerInfo.info?.Config?.Labels?.[labelKey] ??
+            containerInfo.Config?.Labels?.[labelKey]
+        );
+    };
+
+    const getContainerRowIdCandidates = (containerName, containerInfo) => {
+        const candidates = [];
+        if (containerName) {
+            candidates.push(`ct-${containerName}`);
+        }
+        if (containerInfo?.shortId) {
+            candidates.push(`ct-${containerInfo.shortId}`);
+        }
+        if (containerInfo?.Id) {
+            candidates.push(`ct-${containerInfo.Id}`);
+        }
+        if (containerInfo?.info?.Id) {
+            candidates.push(`ct-${containerInfo.info.Id}`);
+        }
+        return candidates.filter((v, i, a) => v && a.indexOf(v) === i);
+    };
+
+    const getContainerNameFromRow = ($row) => {
+        if (!$row || !$row.length) {
+            return '';
+        }
+        const $ctName = $row.find('td.ct-name').first();
+        if (!$ctName.length) {
+            return '';
+        }
+        const $exec = $ctName.find('.appname a.exec').first();
+        if ($exec.length) {
+            return $exec.text().trim();
+        }
+        const $a = $ctName.find('.appname a').first();
+        if ($a.length) {
+            return $a.text().trim();
+        }
+        const $app = $ctName.find('.appname').first();
+        if ($app.length) {
+            return $app.text().trim();
+        }
+        return $ctName.text().trim();
+    };
+
+    const findContainerRow = (containerName, containerInfo) => {
+        for (const idCandidate of getContainerRowIdCandidates(containerName, containerInfo)) {
+            const el = document.getElementById(idCandidate);
+            if (el) {
+                return $(el);
+            }
+        }
+
+        // Fallback: search by visible name in the main docker table (handles cases where name isn't an <a>)
+        const $rowByName = $('#docker_list > tr')
+            .filter(function() {
+                const $tr = $(this);
+                if ($tr.hasClass('folder')) {
+                    return false;
+                }
+                return getContainerNameFromRow($tr) === containerName;
+            })
+            .first();
+
+        return $rowByName;
+    };
     if (FOLDER_VIEW_DEBUG_MODE && id === "2l2rPNIkZHWN5WLqAuzPaCZHSqI") { // Specific log for Network folder
         console.log(`[FV2_DEBUG] createFolder (Network folder ENTRY): folder.containers from input arg =`, JSON.parse(JSON.stringify(folder.containers)));
         console.log(`[FV2_DEBUG] createFolder (Network folder ENTRY): folder.regex from input arg = "${folder.regex}"`);
@@ -233,14 +306,18 @@ const createFolder = (folder, id, positionInMainOrder, liveOrderArray, container
 
     // --- Correctly build combinedContainers ---
     const originalContainersFromDefinition = Array.isArray(folder.containers) ? [...folder.containers] : [];
-    let combinedContainers = [...originalContainersFromDefinition];
+    const liveOrderSet = new Set(orderSnapshotAtFolderStart);
+    const movableContainers = Object.keys(containersInfo).filter((name) => liveOrderSet.has(name));
+
+    let combinedContainers = originalContainersFromDefinition
+        .filter((name) => containersInfo[name] && liveOrderSet.has(name));
     if (FOLDER_VIEW_DEBUG_MODE) console.log(`[FV2_DEBUG] createFolder (id: ${id}): Initial containers from definition for combinedContainers:`, [...originalContainersFromDefinition]);
 
     if (folder.regex && typeof folder.regex === 'string' && folder.regex.trim() !== "") {
         if (FOLDER_VIEW_DEBUG_MODE) console.log(`[FV2_DEBUG] createFolder (id: ${id}): Regex defined: '${folder.regex}'. Filtering orderSnapshotAtFolderStart.`);
         try {
             const re = new RegExp(folder.regex);
-            const regexMatches = orderSnapshotAtFolderStart.filter(el => containersInfo[el] && re.test(el) && !combinedContainers.includes(el));
+            const regexMatches = movableContainers.filter(el => re.test(el) && !combinedContainers.includes(el));
             regexMatches.forEach(match => combinedContainers.push(match));
             if (FOLDER_VIEW_DEBUG_MODE) console.log(`[FV2_DEBUG] createFolder (id: ${id}): Regex matches added:`, regexMatches, "Combined containers after regex:", [...combinedContainers]);
         } catch (e) {
@@ -250,8 +327,11 @@ const createFolder = (folder, id, positionInMainOrder, liveOrderArray, container
         if (FOLDER_VIEW_DEBUG_MODE && folder.regex) console.log(`[FV2_DEBUG] createFolder (id: ${id}): Regex is present but empty or invalid, skipping regex matching.`);
     }
 
-    const labelMatches = orderSnapshotAtFolderStart.filter(el => containersInfo[el]?.Labels?.['folder.view2'] === folder.name && !combinedContainers.includes(el));
+    const labelMatches = movableContainers.filter(el => getContainerLabel(containersInfo[el], 'folder.view2') === folder.name && !combinedContainers.includes(el));
     labelMatches.forEach(match => combinedContainers.push(match));
+
+    const indexInLiveOrder = new Map(orderSnapshotAtFolderStart.map((name, index) => [name, index]));
+    combinedContainers.sort((a, b) => (indexInLiveOrder.get(a) ?? Number.MAX_SAFE_INTEGER) - (indexInLiveOrder.get(b) ?? Number.MAX_SAFE_INTEGER));
 
     if (FOLDER_VIEW_DEBUG_MODE) {
         console.log(`[FV2_DEBUG] createFolder (id: ${id}): Containers matched by 'folder.view2' label ('${folder.name}'):`, labelMatches);
@@ -400,12 +480,9 @@ const createFolder = (folder, id, positionInMainOrder, liveOrderArray, container
             if (FOLDER_VIEW_DEBUG_MODE) console.log(`[FV2_DEBUG] createFolder (id: ${id}), container ${container_name_in_folder}: Original index ${originalIndexOfContainerInSnapshot} < folder position ${positionInMainOrder}. Incremented remBefore to ${remBefore}.`);
         }
 
-        let $containerTR = $(`#ct-${container_name_in_folder}`);
-        if (!$containerTR.length || !$containerTR.hasClass('sortable')) {
-            if(FOLDER_VIEW_DEBUG_MODE) console.log(`[FV2_DEBUG] createFolder (id: ${id}), container ${container_name_in_folder}: TR not found by ID or not sortable. Fallback search...`);
-            $containerTR = $("#docker_list > tr.sortable").filter(function() {
-                return $(this).find("td.ct-name .appname a").text().trim() === container_name_in_folder;
-            }).first();
+        let $containerTR = findContainerRow(container_name_in_folder, ct);
+        if (FOLDER_VIEW_DEBUG_MODE && !$containerTR.length) {
+            console.warn(`[FV2_DEBUG] createFolder (id: ${id}), container ${container_name_in_folder}: Could not locate row in #docker_list for moving into folder.`);
         }
 
         if ($containerTR.length) {
