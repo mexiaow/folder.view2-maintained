@@ -6,18 +6,15 @@
 <!ENTITY launch "Settings/FolderView2">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2026.01.12.1">
-<!ENTITY md5 "bef26851ec020a48b98e73d5caaf8f59">
+<!ENTITY version "2026.01.12">
+<!ENTITY md5 "2c252a67d68879e2f1f65d1e382e7c7a">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/189167-plugin-folderview2" min="7.0.0">
     <CHANGES>
 
-###2026.01.12.1
-- 修复：Unraid 7.2+ 仪表盘 Docker 文件夹布局（仅在展开时恢复横向网格自动换行）
-
 ###2026.01.12
-- 修复：Unraid 7.2+ 仪表盘 Docker 文件夹布局（展开后恢复横向网格自动换行）
+- 修复：Unraid 7.2+ 仪表盘 Docker 文件夹布局（保持卡片连续衔接排布）
 
 ###2025.04.13
 - Fix: Ongoing effort to get new verson to CA, renamed folder.view to folder.view2
