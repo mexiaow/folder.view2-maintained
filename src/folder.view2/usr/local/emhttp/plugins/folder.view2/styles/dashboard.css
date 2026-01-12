@@ -1,3 +1,23 @@
 .folder-storage {
     display:none;
 }
+
+.dashboard #docker_view > tr:last-child > td > .folder-showcase-outer,
+.dashboard #docker_view > tr.updated > td > .folder-showcase-outer {
+    grid-column: 1 / -1;
+}
+
+.dashboard #docker_view .folder-showcase-outer > span.outer {
+    display: block;
+}
+
+.dashboard #docker_view .folder-showcase {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    gap: 10px;
+    align-items: start;
+}
+
+.dashboard #docker_view .folder-showcase > * {
+    min-width: 0;
+}

@@ -1,8 +1,9 @@
-# FolderView2 For Unraid 7
+# FolderView2 For Unraid 7+
 
 ## What is FolderView2?
 
 Original creator: [**scolcipitato**](https://github.com/scolcipitato/folder.view)
+Upstream repo: https://github.com/VladoPortos/folder.view2
 
 FolderView2 lets you create folders for grouping Dockers and VMs together to help with organization. Especially useful if you're using docker-compose.
 Getting Started: A new button named "Add Folder" will appear at the bottom of the docker/VM tab next to "Add Container/VM".
@@ -28,7 +29,7 @@ root@PlexServer:/boot/config/plugins/folder.view#
 
 ### Easy Manual installation
 
-Use link: https://raw.githubusercontent.com/VladoPortos/folder.view2/refs/heads/main/folder.view2.plg
+Use link: https://raw.githubusercontent.com/mexiaow/folder.view2-maintained/main/folder.view2.plg
 
 That link can be posted directly into the plugin install without needing to copy it to the filesystem beforehand.
 
@@ -41,7 +42,7 @@ That link can be posted directly into the plugin install without needing to copy
 3. In Unraid webui go to Plugins -> Install Plugin tab, click on the folder `config` -> `plugins` -> `folder.view2.plg` and press install button.
 
 ## Support & Feedback
-If you have any questions or issues, please file an issue on [GitHub](https://github.com/VladoPortos/folder.view2/issues).
+If you have any questions or issues, please file an issue on [GitHub](https://github.com/mexiaow/folder.view2-maintained/issues).
 
 ## Contributors
 - [TurboStreetCar](https://github.com/TurboStreetCar) - Contributed improved folder.js implementation for compatibility with Unraid 7 and older versions

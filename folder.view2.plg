@@ -2,16 +2,19 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name "folder.view2">
 <!ENTITY author "VladoPortos">
-<!ENTITY github "&author;/&name;">
+<!ENTITY github "mexiaow/folder.view2-maintained">
 <!ENTITY launch "Settings/FolderView2">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2025.04.13">
-<!ENTITY md5 "b3a00c47c4a549d6b97cc1e793f895d0">
+<!ENTITY version "2026.01.12">
+<!ENTITY md5 "35c65ea4f926695e6b4b09251e617095">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/189167-plugin-folderview2" min="7.0.0">
     <CHANGES>
+
+###2026.01.12
+- Fix: Unraid 7.2+ Dashboard Docker folder layout (restore horizontal grid inside folders)
 
 ###2025.04.13
 - Fix: Ongoing effort to get new verson to CA, renamed folder.view to folder.view2
@@ -287,7 +290,7 @@
 
     <!-- New source file -->
     <FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
-        <URL>https://raw.github.com/&github;/master/archive/&name;-&version;.txz</URL>
+        <URL>https://raw.githubusercontent.com/&github;/main/archive/&name;-&version;.txz</URL>
         <MD5>&md5;</MD5>
     </FILE>
 
