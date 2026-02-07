@@ -6,12 +6,17 @@
 <!ENTITY launch "Settings/FolderView2">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2026.01.12.1">
-<!ENTITY md5 "f2415937d48100f114c753d8ccfd1207">
+<!ENTITY version "2026.02.07">
+<!ENTITY md5 "b1c3fc39a59f0ebdb03945525b905f8a">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/189167-plugin-folderview2" min="7.0.0">
     <CHANGES>
+
+###2026.02.07
+- 优化：Docker 容器排序逻辑性能提升（使用 Set 代替数组查找）
+- 修复：regex 和 label 匹配的容器去重不一致问题
+- 改进：手动定义的容器保持用户自定义顺序，动态容器按全局顺序追加
 
 ###2026.01.12.1
 - 修复：Docker 标签页仅靠正则（regex-only）的文件夹不收纳容器

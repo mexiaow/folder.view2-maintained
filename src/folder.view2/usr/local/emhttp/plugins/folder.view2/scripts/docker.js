@@ -305,21 +305,31 @@ const createFolder = (folder, id, positionInMainOrder, liveOrderArray, container
     if (FOLDER_VIEW_DEBUG_MODE) console.log(`[FV2_DEBUG] createFolder (id: ${id}): Advanced view enabled: ${advanced}`);
 
     // --- Correctly build combinedContainers ---
+    // Preserve user-defined order for manually added containers
     const originalContainersFromDefinition = Array.isArray(folder.containers) ? [...folder.containers] : [];
     const liveOrderSet = new Set(orderSnapshotAtFolderStart);
     const movableContainers = Object.keys(containersInfo).filter((name) => liveOrderSet.has(name));
 
+    // Start with manually defined containers (preserve user's custom order)
     let combinedContainers = originalContainersFromDefinition
         .filter((name) => containersInfo[name] && liveOrderSet.has(name));
-    if (FOLDER_VIEW_DEBUG_MODE) console.log(`[FV2_DEBUG] createFolder (id: ${id}): Initial containers from definition for combinedContainers:`, [...originalContainersFromDefinition]);
+    const combinedContainerSet = new Set(combinedContainers);
+    if (FOLDER_VIEW_DEBUG_MODE) console.log(`[FV2_DEBUG] createFolder (id: ${id}): Initial containers from definition (user-defined order):`, [...combinedContainers]);
+
+    // Collect dynamically added containers (regex and labels) separately
+    let dynamicContainers = [];
+    const dynamicContainerSet = new Set();
 
     if (folder.regex && typeof folder.regex === 'string' && folder.regex.trim() !== "") {
         if (FOLDER_VIEW_DEBUG_MODE) console.log(`[FV2_DEBUG] createFolder (id: ${id}): Regex defined: '${folder.regex}'. Filtering orderSnapshotAtFolderStart.`);
         try {
             const re = new RegExp(folder.regex);
-            const regexMatches = movableContainers.filter(el => re.test(el) && !combinedContainers.includes(el));
-            regexMatches.forEach(match => combinedContainers.push(match));
-            if (FOLDER_VIEW_DEBUG_MODE) console.log(`[FV2_DEBUG] createFolder (id: ${id}): Regex matches added:`, regexMatches, "Combined containers after regex:", [...combinedContainers]);
+            const regexMatches = movableContainers.filter(el => re.test(el) && !combinedContainerSet.has(el) && !dynamicContainerSet.has(el));
+            regexMatches.forEach((match) => {
+                dynamicContainers.push(match);
+                dynamicContainerSet.add(match);
+            });
+            if (FOLDER_VIEW_DEBUG_MODE) console.log(`[FV2_DEBUG] createFolder (id: ${id}): Regex matches collected:`, regexMatches);
         } catch (e) {
             if (FOLDER_VIEW_DEBUG_MODE) console.error(`[FV2_DEBUG] createFolder (id: ${id}): Invalid regex '${folder.regex}':`, e);
         }
@@ -327,11 +337,18 @@ const createFolder = (folder, id, positionInMainOrder, liveOrderArray, container
         if (FOLDER_VIEW_DEBUG_MODE && folder.regex) console.log(`[FV2_DEBUG] createFolder (id: ${id}): Regex is present but empty or invalid, skipping regex matching.`);
     }
 
-    const labelMatches = movableContainers.filter(el => getContainerLabel(containersInfo[el], 'folder.view2') === folder.name && !combinedContainers.includes(el));
-    labelMatches.forEach(match => combinedContainers.push(match));
+    const labelMatches = movableContainers.filter(el => getContainerLabel(containersInfo[el], 'folder.view2') === folder.name && !combinedContainerSet.has(el) && !dynamicContainerSet.has(el));
+    labelMatches.forEach((match) => {
+        dynamicContainers.push(match);
+        dynamicContainerSet.add(match);
+    });
 
+    // Sort ONLY the dynamically added containers by global Unraid order
     const indexInLiveOrder = new Map(orderSnapshotAtFolderStart.map((name, index) => [name, index]));
-    combinedContainers.sort((a, b) => (indexInLiveOrder.get(a) ?? Number.MAX_SAFE_INTEGER) - (indexInLiveOrder.get(b) ?? Number.MAX_SAFE_INTEGER));
+    dynamicContainers.sort((a, b) => (indexInLiveOrder.get(a) ?? Number.MAX_SAFE_INTEGER) - (indexInLiveOrder.get(b) ?? Number.MAX_SAFE_INTEGER));
+
+    // Append sorted dynamic containers after the user-defined ones
+    dynamicContainers.forEach(match => combinedContainers.push(match));
 
     if (FOLDER_VIEW_DEBUG_MODE) {
         console.log(`[FV2_DEBUG] createFolder (id: ${id}): Containers matched by 'folder.view2' label ('${folder.name}'):`, labelMatches);
